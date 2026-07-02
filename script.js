@@ -1,34 +1,36 @@
 const time = t =>
-  t ? new Date(t * 1000).toLocaleString() : "N/A";
+  t ? new Date(Number(t) * 1000).toLocaleString() : "N/A";
 
 document.getElementById("searchBtn").addEventListener("click", load);
 
-function load(){
+async function load() {
   const uid = document.getElementById("uid").value.trim();
   const r = document.getElementById("result");
-  if(!uid){
+
+  if (!uid) {
     alert("أدخل UID");
     return;
   }
 
   r.innerHTML = `<div class="card">⏳ جاري جلب المعلومات...</div>`;
 
-  fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(
-    "https://accinfo.vercel.app/player-info?region=sg&uid=" + uid
-  )}`)
-  .then(res => res.json())
-  .then(j => {
+  try {
+    const res = await fetch(`https://accinfo.vercel.app/player-info?region=sg&uid=${uid}`);
 
-    const basic   = j.data.basicInfo || {};
-    const social  = j.data.socialInfo || {};
-    const profile = j.data.profileInfo || {};
-    const pet     = j.data.petInfo || {};
-    const clan    = j.data.clanBasicInfo || {};
-    const captain = j.data.captainBasicInfo || {};
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const j = await res.json();
+
+    const basic = j.basicInfo || {};
+    const social = j.socialInfo || {};
+    const profile = j.profileInfo || {};
+    const pet = j.petInfo || {};
+    const clan = j.clanBasicInfo || {};
+    const captain = j.captainBasicInfo || {};
 
     r.innerHTML = `
-
-<!-- ACCOUNT BASIC INFO -->
 <div class="card">
 <h3>👑 ACCOUNT BASIC INFO</h3>
 <p>👤 Name: ${basic.nickname || "N/A"}</p>
@@ -42,7 +44,6 @@ function load(){
 <p>✍️ Signature: ${social.signature || "N/A"}</p>
 </div>
 
-<!-- ACCOUNT ACTIVITY -->
 <div class="card">
 <h3>🎮 ACCOUNT ACTIVITY</h3>
 <p>📦 OB Version: ${basic.releaseVersion || "N/A"}</p>
@@ -54,7 +55,6 @@ function load(){
 <p>⏱ Last Login: ${time(basic.lastLoginAt)}</p>
 </div>
 
-<!-- ACCOUNT OVERVIEW -->
 <div class="card">
 <h3>🧍 ACCOUNT OVERVIEW</h3>
 <p>🖼 Avatar ID: ${profile.avatarId || "N/A"}</p>
@@ -65,7 +65,6 @@ function load(){
 <p>✨ Transform Animation: ${profile.isSelectedAwaken}</p>
 </div>
 
-<!-- PET INFORMATION -->
 <div class="card">
 <h3>🐾 PET INFORMATION</h3>
 <p>🐶 Equipped: ${pet.isSelected}</p>
@@ -75,7 +74,6 @@ function load(){
 <p>📊 Level: ${pet.level || "N/A"}</p>
 </div>
 
-<!-- GUILD INFORMATION -->
 <div class="card">
 <h3>🛡️ GUILD INFORMATION</h3>
 <p>🏰 Name: ${clan.clanName || "N/A"}</p>
@@ -84,7 +82,6 @@ function load(){
 <p>👥 Members: ${clan.memberNum || "N/A"}</p>
 </div>
 
-<!-- LEADER INFO -->
 <div class="card">
 <h3>👑 LEADER INFO</h3>
 <p>👤 Name: ${captain.nickname || "N/A"}</p>
@@ -97,16 +94,13 @@ function load(){
 <p>⚡ CS Points: ${captain.csRankingPoints || "N/A"}</p>
 </div>
 
-<!-- OWNER -->
 <div class="card" style="text-align:center">
 <h3>👑 Owner</h3>
 <p>@saif_Officiel</p>
 <a href="https://t.me/UXD_5" target="_blank">⚡ FF LIKE GROUP</a>
-</div>
-
-    `;
-  })
-  .catch(()=>{
-    r.innerHTML = `<div class="card">❌ فشل جلب البيانات</div>`;
-  });
+</div>`;
+  } catch (err) {
+    console.error(err);
+    r.innerHTML = `<div class="card">❌ ${err.message}</div>`;
+  }
 }
