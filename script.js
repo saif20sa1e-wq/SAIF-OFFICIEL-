@@ -14,7 +14,7 @@ function load(){
   r.innerHTML = `<div class="card">⏳ جاري جلب المعلومات...</div>`;
 
   fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(
-    "https://ch9ayfa-info-v10-production.up.railway.app/get?uid=" + uid
+    "https://accinfo.vercel.app/player-info?region=sg&uid=" + uid
   )}`)
   .then(res => res.json())
   .then(j => {
